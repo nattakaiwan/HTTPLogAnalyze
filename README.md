@@ -13,20 +13,20 @@ URL ที่ถูกเรียกมากที่สุด
 
 1. Clone repository:
    
-git clone https://github.com/nattakaiwan/HTTPLogAnalyze.git
-cd HTTPLogAnalyze
+		git clone https://github.com/nattakaiwan/HTTPLogAnalyze.git
+		cd HTTPLogAnalyze
 
 3. ติดตั้ง dependencies:
    
-pip install -r requirements.txt
+		pip install -r requirements.txt
 
 
 🚀 วิธีใช้งาน
 
-python main.py <path_to_log_file>
+		python main.py <path_to_log_file>
 
 ตัวอย่าง:
 
-python main.py access.log
+		python main.py access.log
 
 
