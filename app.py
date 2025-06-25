@@ -47,3 +47,8 @@ if uploaded_file is not None:
 
     except Exception as e:
         st.error(f"เกิดข้อผิดพลาด: {e}")
+
+# แสดงชื่อผู้สร้าง
+st.markdown("---")
+st.markdown("### 👨‍💻 A project by Nattakaiwan")
+
