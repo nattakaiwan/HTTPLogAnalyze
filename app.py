@@ -50,5 +50,5 @@ if uploaded_file is not None:
 
 # แสดงชื่อผู้สร้าง
 st.markdown("---")
-st.markdown("### 👨‍💻 A project by Nattakaiwan")
+st.caption("👨‍💻 Project by: Nattakaiwan")
 
