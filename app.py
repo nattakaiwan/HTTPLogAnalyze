@@ -1,15 +1,25 @@
+import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import re
 from datetime import datetime
-import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
 
-def parse_log_file(file_path):
+st.set_page_config(page_title="Log Analyzer", layout="wide")
+
+st.title("📊 Log Request Analyzer")
+
+uploaded_file = st.file_uploader("📁 อัปโหลดไฟล์ log (.csv หรือ .txt)", type=["csv", "txt"])
+
+interval = st.selectbox(
+    "⏱️ เลือกช่วงเวลาในการแสดงผล",
+    options=["S", "1Min", "30Min", "1H"],
+    index=1,
+    help="S = ต่อวินาที, 1Min = ต่อ 1 นาที, 30Min = ต่อ 30 นาที, 1H = ต่อ 1 ชั่วโมง"
+)
+
+if uploaded_file is not None:
     try:
-        with open(file_path, "r") as file:
-            lines = file.readlines()
-
+        lines = uploaded_file.read().decode("utf-8").splitlines()
         timestamp_pattern = re.compile(r'\[(\d{2}/\w{3}/\d{4}:\d{2}:\d{2}:\d{2})')
         timestamps = []
 
@@ -22,59 +32,18 @@ def parse_log_file(file_path):
 
         df = pd.DataFrame(timestamps, columns=["Timestamp"])
         df.set_index("Timestamp", inplace=True)
-        return df
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to parse log file: {e}")
-        return None
-
-def plot_graph(df, interval):
-    try:
         request_counts = df.resample(interval).size()
-        plt.figure(figsize=(15, 6))
-        plt.plot(request_counts.index, request_counts.values, label=f"Requests per {interval}", color='blue')
-        plt.xlabel("Time")
-        plt.ylabel("Number of Requests")
-        plt.title(f"Requests per {interval}")
-        plt.grid(True)
-        plt.tight_layout()
-        plt.legend()
+
+        st.subheader(f"📈 กราฟจำนวนคำขอ ({interval})")
+        fig, ax = plt.subplots(figsize=(15, 5))
+        ax.plot(request_counts.index, request_counts.values, label=f"Requests per {interval}", color="blue")
+        ax.set_xlabel("Time")
+        ax.set_ylabel("Number of Requests")
+        ax.set_title(f"Requests per {interval}")
+        ax.grid(True)
+        ax.legend()
         plt.xticks(rotation=45)
-        plt.show()
+        st.pyplot(fig)
+
     except Exception as e:
-        messagebox.showerror("Error", f"Failed to plot graph: {e}")
-
-def upload_file():
-    file_path = filedialog.askopenfilename(title="Select Log File", filetypes=[("CSV Files", "*.csv"), ("Text Files", "*.txt"), ("All Files", "*.*")])
-    if file_path:
-        df = parse_log_file(file_path)
-        if df is not None:
-            interval = interval_var.get()
-            if interval in valid_intervals:
-                plot_graph(df, interval)
-            else:
-                messagebox.showerror("Error", "Invalid interval selected.")
-
-# GUI setup
-root = tk.Tk()
-root.title("Log Request Analyzer")
-root.geometry("500x200")
-root.configure(bg="#f0f4f7")
-
-frame = tk.Frame(root, bg="#f0f4f7")
-frame.pack(padx=30, pady=30)
-
-label = tk.Label(frame, text="เลือกช่วงเวลาในการแสดงผล:", font=("Arial", 12), bg="#f0f4f7")
-label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
-
-interval_var = tk.StringVar()
-interval_dropdown = ttk.Combobox(frame, textvariable=interval_var, font=("Arial", 11), width=15)
-valid_intervals = ["S", "1Min", "30Min", "1H"]
-interval_dropdown['values'] = valid_intervals
-interval_dropdown.current(1)
-interval_dropdown.grid(row=0, column=1, padx=10, pady=10)
-
-upload_button = tk.Button(frame, text="อัปโหลดไฟล์และแสดงกราฟ", command=upload_file, font=("Arial", 12), bg="#4CAF50", fg="white", padx=10, pady=5)
-upload_button.grid(row=1, column=0, columnspan=2, pady=20)
-
-root.mainloop()
-
+        st.error(f"เกิดข้อผิดพลาด: {e}")
